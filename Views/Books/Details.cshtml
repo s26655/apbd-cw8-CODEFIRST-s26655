@@ -1,0 +1,55 @@
+@model CourseLibrary.Models.Book
+
+@{
+    ViewData["Title"] = "Book details";
+}
+
+<h1>Book details</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">Title</dt>
+    <dd class="col-sm-9">@Model.Title</dd>
+
+    <dt class="col-sm-3">ISBN</dt>
+    <dd class="col-sm-9">@Model.Isbn</dd>
+
+    <dt class="col-sm-3">Publication year</dt>
+    <dd class="col-sm-9">@Model.PublishedYear</dd>
+
+    <dt class="col-sm-3">Author</dt>
+    <dd class="col-sm-9">@Model.Author.FirstName @Model.Author.LastName</dd>
+</dl>
+
+<p>
+    <a asp-controller="Borrowings" asp-action="Create" asp-route-bookId="@Model.Id" class="btn btn-primary">Add borrowing</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to books</a>
+</p>
+
+<h2>Borrowing history</h2>
+
+@if (!Model.Borrowings.Any())
+{
+    <p>No borrowings yet.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Borrower</th>
+                <th>Borrowed at</th>
+                <th>Returned at</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var borrowing in Model.Borrowings)
+        {
+            <tr>
+                <td>@borrowing.BorrowerName</td>
+                <td>@borrowing.BorrowedAt.ToShortDateString()</td>
+                <td>@(borrowing.ReturnedAt?.ToShortDateString() ?? "-")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

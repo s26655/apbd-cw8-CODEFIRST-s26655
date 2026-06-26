@@ -1,0 +1,44 @@
+@model CourseLibrary.ViewModels.BorrowingCreateViewModel
+
+@{
+    ViewData["Title"] = "Add borrowing";
+}
+
+<h1>Add borrowing</h1>
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="BookId" class="form-label">Book</label>
+        <select asp-for="BookId" asp-items="Model.Books" class="form-select">
+            <option value="0">-- choose book --</option>
+        </select>
+        <span asp-validation-for="BookId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="BorrowerName" class="form-label">Borrower name</label>
+        <input asp-for="BorrowerName" class="form-control" />
+        <span asp-validation-for="BorrowerName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="BorrowedAt" class="form-label">Borrowed at</label>
+        <input asp-for="BorrowedAt" type="date" class="form-control" />
+        <span asp-validation-for="BorrowedAt" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ReturnedAt" class="form-label">Returned at</label>
+        <input asp-for="ReturnedAt" type="date" class="form-control" />
+        <span asp-validation-for="ReturnedAt" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-controller="Books" asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

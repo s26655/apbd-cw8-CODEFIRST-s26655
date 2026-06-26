@@ -1,0 +1,37 @@
+@model IEnumerable<CourseLibrary.Models.Book>
+
+@{
+    ViewData["Title"] = "Books";
+}
+
+<h1>Books</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Add book</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>ISBN</th>
+            <th>Publication year</th>
+            <th>Author</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var book in Model)
+    {
+        <tr>
+            <td>@book.Title</td>
+            <td>@book.Isbn</td>
+            <td>@book.PublishedYear</td>
+            <td>@book.Author.FirstName @book.Author.LastName</td>
+            <td>
+                <a asp-action="Details" asp-route-id="@book.Id">Details</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
