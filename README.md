@@ -1,7 +1,8 @@
 # Course Library
 
 ASP.NET Core MVC application for a small university course library.
-The application uses Entity Framework Core with the Code First approach and SQL Server.
+
+The application uses Entity Framework Core with the Code First approach and SQL Server. It was created to practice `DbContext`, entities, relationships, migrations, and data seeding.
 
 ## Features
 
@@ -15,33 +16,33 @@ The application supports:
 
 ## Domain model
 
-The application contains three main entities:
+The application contains three main entities.
 
-* `Author`
+### Author
 
-  * `Id`
-  * `FirstName`
-  * `LastName`
-  * collection of `Books`
+* `Id`
+* `FirstName`
+* `LastName`
+* collection of `Books`
 
-* `Book`
+### Book
 
-  * `Id`
-  * `Title`
-  * `Isbn`
-  * `PublishedYear`
-  * `AuthorId`
-  * related `Author`
-  * collection of `Borrowings`
+* `Id`
+* `Title`
+* `Isbn`
+* `PublishedYear`
+* `AuthorId`
+* related `Author`
+* collection of `Borrowings`
 
-* `Borrowing`
+### Borrowing
 
-  * `Id`
-  * `BookId`
-  * related `Book`
-  * `BorrowerName`
-  * `BorrowedAt`
-  * `ReturnedAt`
+* `Id`
+* `BookId`
+* related `Book`
+* `BorrowerName`
+* `BorrowedAt`
+* `ReturnedAt`
 
 ## Relationships
 
@@ -76,7 +77,9 @@ It contains the following `DbSet` properties:
 
 ```csharp
 public DbSet<Author> Authors => Set<Author>();
+
 public DbSet<Book> Books => Set<Book>();
+
 public DbSet<Borrowing> Borrowings => Set<Borrowing>();
 ```
 
@@ -88,7 +91,8 @@ builder.Services.AddDbContext<LibraryDbContext>(options =>
 ```
 
 Controllers do not create the context manually with `new`.
-The context is injected through services.
+
+The context is injected into the service layer through dependency injection.
 
 ## Business logic
 
@@ -101,7 +105,9 @@ Services/ILibraryService.cs
 Services/LibraryService.cs
 ```
 
-The service checks, for example, whether an author exists before adding a book and whether a book exists before adding a borrowing.
+The service checks whether an author exists before adding a book and whether a book exists before adding a borrowing.
+
+This keeps controllers focused on handling HTTP requests and returning views.
 
 ## Validation
 
@@ -124,6 +130,8 @@ Implemented validation rules:
 * book must be selected when creating a borrowing
 * borrowing cannot be added for a book that does not exist
 
+The last rule is also checked in the service layer before saving a borrowing to the database.
+
 ## Seed data
 
 Seed data is configured with `HasData`.
@@ -140,6 +148,8 @@ The database is seeded with:
 * 3 authors
 * 5 books
 
+The seed data uses fixed `Id` values, which is required when using `HasData`.
+
 ## Connection string
 
 The connection string is stored in:
@@ -155,6 +165,8 @@ Current local development connection string:
 ```
 
 The connection string is not hardcoded in controllers or services.
+
+The password is a local development password only. It is not a real production password.
 
 ## Requirements
 
@@ -200,9 +212,9 @@ Check the installed version:
 dotnet ef --version
 ```
 
-## Creating the database
+## How to create or restore the database
 
-To create the database from the existing migration, run:
+To create or restore the database from the existing migration, run:
 
 ```bash
 dotnet ef database update
@@ -210,7 +222,7 @@ dotnet ef database update
 
 This applies the migration from the `Migrations` folder and creates the database schema with seed data.
 
-## Recreating the database
+## How to recreate the database
 
 To recreate the local database from scratch:
 
@@ -221,9 +233,29 @@ dotnet ef database update
 
 Confirm the drop operation when prompted.
 
-## Creating a new migration
+## Migration command used in this project
 
-If the model changes, create a new migration with:
+The command used to create the initial migration was:
+
+```bash
+dotnet ef migrations add InitialCreate
+```
+
+The migration was then applied with:
+
+```bash
+dotnet ef database update
+```
+
+The initial migration is included in the repository:
+
+```text
+Migrations/20260626212437_InitialCreate.cs
+```
+
+## Creating a new migration after model changes
+
+If the model changes in the future, create a new migration with:
 
 ```bash
 dotnet ef migrations add MigrationName
@@ -233,12 +265,6 @@ Then apply it with:
 
 ```bash
 dotnet ef database update
-```
-
-The initial migration is already included in the repository:
-
-```text
-Migrations/20260626212437_InitialCreate.cs
 ```
 
 ## Running the application
@@ -279,18 +305,20 @@ The default route opens the books list.
 /Borrowings/Create
 ```
 
-## Short lecture questions
+## Questions for README
 
-### What is an ORM?
+### What does ORM mean and what problem does EF Core solve?
 
 ORM means Object-Relational Mapping.
-It allows the application to work with database data through C# classes instead of manually writing SQL for every operation.
 
-In this project, Entity Framework Core maps the C# classes `Author`, `Book`, and `Borrowing` to SQL Server tables.
+It solves the problem of manually translating between database tables and C# objects. Without an ORM, the developer usually has to write more SQL and manually map query results to objects.
 
-### What is DbContext?
+EF Core allows the application to work with database data through C# classes such as `Author`, `Book`, and `Borrowing`. It maps these classes to SQL Server tables and can translate LINQ queries into SQL queries.
+
+### What is the role of DbContext?
 
 `DbContext` is the main EF Core class responsible for database access.
+
 It represents a session with the database and is used for querying, adding, updating, and deleting entities.
 
 In this project, the custom context is:
@@ -299,9 +327,13 @@ In this project, the custom context is:
 Data/LibraryDbContext.cs
 ```
 
-### What is a DbSet?
+It exposes `DbSet` properties for `Author`, `Book`, and `Borrowing`.
 
-A `DbSet<TEntity>` represents a database table for a specific entity type.
+### How is DbSet different from a normal C# list?
+
+A normal C# list stores objects only in memory.
+
+A `DbSet<TEntity>` represents a database table for a specific entity type. It allows EF Core to build database queries and execute them against the database.
 
 For example:
 
@@ -311,39 +343,38 @@ public DbSet<Book> Books => Set<Book>();
 
 represents the `Books` table.
 
-### How is DbSet different from a normal list?
+Unlike a normal list, a `DbSet` can translate LINQ operations into SQL and load data from the database.
 
-A normal C# list stores objects only in memory.
-A `DbSet` represents database data and allows EF Core to translate LINQ queries into SQL queries executed against the database.
-
-### Why should DbContext be registered as scoped?
+### Why should DbContext be Scoped in a web application?
 
 In a web application, a scoped `DbContext` means one context instance is created for one HTTP request.
-This is appropriate because it keeps database work consistent during the request and avoids sharing the same context between unrelated users or requests.
 
-### What is a migration?
+This is appropriate because it keeps database work consistent during the request and avoids sharing the same context instance between unrelated users or requests.
 
-A migration is a file generated by EF Core that describes database schema changes.
-It allows the database schema to be created or updated based on the C# model.
+A singleton `DbContext` would be unsafe because it could be shared across many requests. A transient context could make it harder to keep one consistent unit of work during a request.
 
-This project contains the initial migration in the `Migrations` folder.
+### What does an EF Core migration do?
 
-### What does idempotent seeding mean?
+An EF Core migration describes database schema changes generated from the C# model.
 
-Idempotent seeding means that running the seed operation multiple times should not create duplicate data.
+It allows the database schema to be created or updated in a controlled way.
+
+In this project, the initial migration creates the `Authors`, `Books`, and `Borrowings` tables, relationships, indexes, and seed data.
+
+### Why should seeding be idempotent?
+
+Seeding should be idempotent because running the application or database setup more than once should not create duplicate data.
+
+For example, the same authors and books should not be inserted again every time the application starts.
 
 In this project, seed data is configured with `HasData` and fixed IDs. EF Core applies this seed data through migrations.
 
-### What is Code First?
+### When is Code First a good choice, and when should Database First be considered?
 
-Code First is an approach where the developer first creates C# entity classes and configuration, and EF Core generates the database schema from that model.
+Code First is a good choice when the application is being created from scratch and the C# domain model should be the source of truth.
 
-This project uses Code First because the database is created from the C# models and EF Core migration.
+It is also useful when the developer wants to manage database changes with EF Core migrations.
 
-### Code First vs Database First
+Database First should be considered when the database already exists, especially in older systems or systems where the database schema is controlled outside the application.
 
-In Code First, the C# model is the source of truth and the database is generated from code.
-
-In Database First, the database already exists first, and C# classes are generated or scaffolded from the database schema.
-
-This project uses Code First.
+This project uses Code First because the C# entity classes were created first and the SQL Server database was generated from the EF Core migration.
