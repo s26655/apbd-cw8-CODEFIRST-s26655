@@ -1,4 +1,5 @@
 using CourseLibrary.Data;
+using CourseLibrary.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,8 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<LibraryDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+builder.Services.AddScoped<ILibraryService, LibraryService>();
 
 var app = builder.Build();
 
